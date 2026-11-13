@@ -330,7 +330,7 @@ def analyze_transaction_with_gemini(
 # -----------------------------------------------------------------------------
 # 6. Sidebar: API Key Resolution & Global Demo Shortcut
 # -----------------------------------------------------------------------------
-st.sidebar.image("https://img.icons8.com/fluency/96/shield.png", width=64)
+st.sidebar.markdown("# 🛡️ Financial Security")
 st.sidebar.title("SentinelGuard AML")
 st.sidebar.caption("Autonomous Financial Crime & Fraud Intelligence")
 
