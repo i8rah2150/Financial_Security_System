@@ -26,7 +26,7 @@ st.set_page_config(
 
 
 # -----------------------------------------------------------------------------
-# 2. Structured Pydantic Schemas for Gemini 2.5 Flash
+# 2. Structured Pydantic Schemas for Gemini 3.5 Flash Lite
 # -----------------------------------------------------------------------------
 class RiskIndicator(BaseModel):
     indicator_name: str = Field(
@@ -279,7 +279,7 @@ def analyze_transaction_with_gemini(
     transaction_payload: Dict[str, Any],
     max_retries: int = 3,
 ) -> TransactionRiskAssessment:
-    """Invokes Gemini 2.5 Flash with structured JSON output schema and exponential backoff retry."""
+    """Invokes Gemini 3.5 Flash Lite with structured JSON output schema and exponential backoff retry."""
     client = genai.Client(api_key=api_key)
 
     prompt = f"""
@@ -373,7 +373,7 @@ header_col1, header_col2 = st.columns([3, 1])
 with header_col1:
     st.title("🛡️ Financial Security, Fraud & AML System")
     st.markdown(
-        "Autonomous real-time transaction screening, structuring detection, and AML alert triage powered by **Gemini 2.5 Flash**."
+        "Autonomous real-time transaction screening, structuring detection, and AML alert triage powered by **Gemini 3.5 Flash Lite**."
     )
 with header_col2:
     st.write("")
@@ -402,7 +402,7 @@ tab_screener, tab_scanner, tab_alerts, tab_analytics = st.tabs(
 with tab_screener:
     st.subheader("⚡ Real-Time Transaction Screening Engine")
     st.caption(
-        "Input transaction details or use instant presets to evaluate fraud and AML risk patterns via Gemini 2.5 Flash structured output."
+        "Input transaction details or use instant presets to evaluate fraud and AML risk patterns via Gemini 3.5 Flash Lite structured output."
     )
 
     # Preset Quick Loaders for Demo Convenience
@@ -512,7 +512,7 @@ with tab_screener:
                 "account_age": input_account_age,
                 "daily_freq": input_daily_freq,
             }
-            with st.spinner("🤖 SentinelGuard Engine: Analyzing risk vectors with Gemini 2.5 Flash..."):
+            with st.spinner("🤖 SentinelGuard Engine: Analyzing risk vectors with Gemini 3.5 Flash Lite..."):
                 try:
                     result_model = analyze_transaction_with_gemini(
                         api_key=active_api_key,
