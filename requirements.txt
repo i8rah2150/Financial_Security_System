@@ -2,3 +2,6 @@ streamlit
 google-genai
 pandas
 pydantic
+scikit-learn
+networkx
+plotly

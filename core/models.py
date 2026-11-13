@@ -18,8 +18,16 @@ CITIES: List[str] = [
     "Lucknow",
 ]
 
-# Indian payment rails
-PAYMENT_CHANNELS: List[str] = ["UPI", "IMPS", "NEFT", "Wallet"]
+# Expanded payment rails & settlement channels
+PAYMENT_CHANNELS: List[str] = [
+    "UPI",
+    "Money Transfer",
+    "Crypto",
+    "Card Swipe",
+    "IMPS",
+    "NEFT",
+    "Wallet",
+]
 
 # Regulatory KYC tiers
 KYC_TIERS: List[str] = [

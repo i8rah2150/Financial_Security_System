@@ -247,12 +247,12 @@ def generate_transactions(accounts_df: pd.DataFrame, n: int = 80) -> pd.DataFram
 
         # Power-law distribution: mostly low-value everyday payments (100 - 15,000 INR)
         # Occasionally higher business payments (25,000 - 80,000 INR)
-        if random.random() < 0.75:
+        if random.random() < 0.70:
             amount = round(random.uniform(100.0, 12000.0), 2)
-            channel = random.choices(["UPI", "Wallet", "IMPS"], weights=[0.7, 0.2, 0.1])[0]
+            channel = random.choices(["UPI", "Card Swipe", "Wallet", "Money Transfer"], weights=[0.45, 0.25, 0.15, 0.15])[0]
         else:
-            amount = round(random.uniform(15000.0, 85000.0), 2)
-            channel = random.choices(["IMPS", "NEFT", "UPI"], weights=[0.45, 0.45, 0.10])[0]
+            amount = round(random.uniform(15000.0, 95000.0), 2)
+            channel = random.choices(["IMPS", "NEFT", "Crypto", "Money Transfer"], weights=[0.35, 0.35, 0.15, 0.15])[0]
 
         delta_minutes = random.randint(30, 7 * 24 * 60)
         txn_time = now - timedelta(minutes=delta_minutes)
