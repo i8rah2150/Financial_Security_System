@@ -266,11 +266,6 @@ def load_all_sample_data() -> None:
     st.session_state.sample_loaded = True
 
 
-# Auto-populate if empty so jury always has immediate visual feedback
-if not st.session_state.sample_loaded or st.session_state.batch_transactions.empty:
-    load_all_sample_data()
-
-
 # -----------------------------------------------------------------------------
 # 5. Gemini API Wrapper with 429 Exponential Backoff
 # -----------------------------------------------------------------------------
@@ -313,7 +308,6 @@ def analyze_transaction_with_gemini(
                     temperature=0.1,
                 ),
             )
-            # Parse verified JSON into Pydantic model
             parsed_data = json.loads(response.text)
             return TransactionRiskAssessment(**parsed_data)
 
@@ -334,7 +328,6 @@ st.sidebar.markdown("# 🛡️ Financial Security")
 st.sidebar.title("SentinelGuard AML")
 st.sidebar.caption("Autonomous Financial Crime & Fraud Intelligence")
 
-# Check st.secrets first per GEMINI.md rules
 configured_api_key = ""
 try:
     if "GEMINI_API_KEY" in st.secrets:
@@ -405,7 +398,6 @@ with tab_screener:
         "Input transaction details or use instant presets to evaluate fraud and AML risk patterns via Gemini 3.5 Flash Lite structured output."
     )
 
-    # Preset Quick Loaders for Demo Convenience
     preset_col1, preset_col2, preset_col3 = st.columns([1, 1, 2])
     with preset_col1:
         if st.button("🚩 Preset: Structuring / Smurfing", use_container_width=True):
@@ -443,7 +435,6 @@ with tab_screener:
 
     st.markdown("---")
 
-    # Transaction Input Form
     with st.form("screener_form"):
         col_in1, col_in2, col_in3 = st.columns(3)
 
@@ -454,7 +445,6 @@ with tab_screener:
                 max_value=10_000_000.0,
                 value=float(st.session_state.screener_prefill["amount"]),
                 step=50.0,
-                help="Transactions just below $10,000 trigger Bank Secrecy Act (BSA) structuring checks.",
             )
             type_options = ["Wire Transfer", "UPI", "Crypto", "Card Swipe"]
             input_type = st.selectbox(
@@ -469,12 +459,10 @@ with tab_screener:
             input_sender = st.text_input(
                 "Sender Location / Jurisdiction",
                 value=st.session_state.screener_prefill["sender_loc"],
-                help="Country or city where origin account or IP resides.",
             )
             input_recipient = st.text_input(
                 "Recipient Location / Jurisdiction",
                 value=st.session_state.screener_prefill["recipient_loc"],
-                help="Destination account or wallet location.",
             )
 
         with col_in3:
@@ -483,21 +471,18 @@ with tab_screener:
                 min_value=1,
                 max_value=7300,
                 value=int(st.session_state.screener_prefill["account_age"]),
-                help="New accounts with high initial volume are high-risk indicators.",
             )
             input_daily_freq = st.number_input(
                 "Daily Frequency (Transactions Today)",
                 min_value=1,
                 max_value=500,
                 value=int(st.session_state.screener_prefill["daily_freq"]),
-                help="Rapid bursts in 24 hours signal structuring or bot automation.",
             )
 
         btn_analyze = st.form_submit_button(
             "⚡ Analyze Transaction Risk", type="primary", use_container_width=True
         )
 
-    # Execution & Result Presentation
     if btn_analyze:
         if not active_api_key:
             st.error(
@@ -523,7 +508,6 @@ with tab_screener:
                 except Exception as ex:
                     st.error(f"Error during AI risk assessment: {str(ex)}")
 
-    # Display Persistent AI Insights
     if st.session_state.live_screener_result:
         res = st.session_state.live_screener_result
         st.markdown("### 🔍 Risk Scoring & Explainable AI Insights")
@@ -531,7 +515,6 @@ with tab_screener:
         score = res["risk_score"]
         level = res["risk_level"]
 
-        # Color-coded metric and status badge
         res_col1, res_col2, res_col3 = st.columns([1, 1, 2])
         with res_col1:
             st.metric(
@@ -553,7 +536,6 @@ with tab_screener:
                 f"**Recommended Compliance Action:**\n\n`{res.get('recommended_action', 'Escalate to AML Tier 2')}`"
             )
 
-        # Executive Summary & AML Patterns
         st.markdown("#### 📝 Executive Summary")
         st.write(res.get("executive_summary", ""))
 
@@ -562,7 +544,6 @@ with tab_screener:
             for pat in res["aml_patterns_detected"]:
                 st.markdown(f"- 🔴 **{pat}**")
 
-        # Granular Explainable Risk Indicators
         st.markdown("#### 🔬 Granular Risk Factor Breakdown")
         indicators = res.get("risk_indicators", [])
         if indicators:
@@ -583,7 +564,7 @@ with tab_scanner:
     col_btn, col_filter, col_type = st.columns([1.2, 1, 1])
     with col_btn:
         if st.button("📥 Load Sample Dataset", type="primary", use_container_width=True):
-            st.session_state.batch_transactions = get_sample_batch_transactions()
+            load_all_sample_data()
             st.toast("Loaded 10 synthetic transactions!", icon="📊")
             st.rerun()
 
@@ -594,7 +575,6 @@ with tab_scanner:
         available_types = ["All Types", "Wire Transfer", "Crypto", "Card Swipe", "UPI"]
         selected_type = st.selectbox("Filter Payment Rail", available_types)
 
-    # Filter Application
     df_display = st.session_state.batch_transactions.copy()
     if not df_display.empty:
         if high_risk_only:
@@ -602,7 +582,6 @@ with tab_scanner:
         if selected_type != "All Types":
             df_display = df_display[df_display["Type"] == selected_type]
 
-        # Key Batch Summary Metrics
         b_m1, b_m2, b_m3, b_m4 = st.columns(4)
         b_m1.metric("Visible Records", len(df_display))
         b_m2.metric("Batch Volume", f"${df_display['Amount_USD'].sum():,.2f}")
@@ -622,7 +601,7 @@ with tab_scanner:
             },
         )
     else:
-        st.info("No transaction data available. Click 'Load Sample Dataset' to begin.")
+        st.info("No transaction data loaded yet. Click 'Load Sample Dataset' above to populate records.")
 
 
 # =============================================================================
@@ -637,7 +616,7 @@ with tab_alerts:
     alerts = st.session_state.active_alerts
 
     if not alerts:
-        st.success("🎉 All security alerts have been investigated and triaged!")
+        st.info("No security alerts loaded. Click 'Load Sample Dataset' or 'One-Click Demo Load' to view alerts.")
     else:
         for idx, alert in enumerate(alerts):
             with st.container(border=True):
@@ -656,7 +635,6 @@ with tab_alerts:
                     st.caption(f"Jurisdiction: {alert['jurisdiction']} • Detected: {alert['timestamp']}")
 
                 with al_col3:
-                    # Mark as Investigated Button
                     investigated_disabled = alert["status"] == "Investigated"
                     if st.button(
                         "✅ Investigated",
@@ -669,7 +647,6 @@ with tab_alerts:
                         st.rerun()
 
                 with al_col4:
-                    # Block Account Button
                     blocked_disabled = alert["status"] == "Account Blocked"
                     if st.button(
                         "🚫 Block Account",
@@ -699,34 +676,26 @@ with tab_analytics:
     avg_score = df_all["Risk_Score"].mean() if not df_all.empty else 0.0
     active_aml_flags = len([a for a in alerts_all if a["status"] != "Investigated"])
 
-    # Summary KPI Cards
     kpi1, kpi2, kpi3, kpi4 = st.columns(4)
     kpi1.metric(
         label="Total Transactions Scanned",
         value=f"{total_scanned:,}",
-        delta="+10 in batch",
     )
     kpi2.metric(
         label="Total Fraud Prevented ($)",
         value=f"${total_prevented:,.2f}",
-        delta="Protected Capital",
-        delta_color="normal",
     )
     kpi3.metric(
         label="Average Risk Score",
         value=f"{avg_score:.1f}/100",
-        delta="Threat Index",
-        delta_color="inverse",
     )
     kpi4.metric(
         label="Active AML Flags",
         value=active_aml_flags,
-        delta=f"{len(alerts_all) - active_aml_flags} resolved",
     )
 
     st.markdown("---")
 
-    # Visual Threat Charts
     chart_col1, chart_col2 = st.columns(2)
 
     with chart_col1:
@@ -759,7 +728,6 @@ with tab_analytics:
 
     st.markdown("---")
     st.markdown("#### 📈 Hourly Anomaly Detection & Threat Velocity")
-    # Synthetic time-series threat progression
     timeline_data = pd.DataFrame(
         {
             "Hour": ["06:00", "07:00", "08:00", "09:00", "10:00", "11:00"],
